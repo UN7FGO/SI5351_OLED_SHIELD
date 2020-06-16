@@ -20,8 +20,8 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Определяем контакты, к которым у нас подключен энкодер
-#define ENC_CLK_PIN 5
-#define ENC_DT_PIN  6
+#define ENC_CLK_PIN 8
+#define ENC_DT_PIN  9
 #define ENC_SW_PIN  7
 
 RotaryEncoder encoder(ENC_DT_PIN, ENC_CLK_PIN);   
@@ -165,7 +165,7 @@ void RefreshDisplay() {
       Ss = Ss + ".";    
     }
   }
-  display.setCursor(0, 32);     // Start at top-left corner
+  display.setCursor(0, 24);     // Start at top-left corner
   ppos = 10 - pos;
   if (ppos < 7) { ppos--; }
   if (ppos < 3) { ppos--; }
@@ -177,6 +177,9 @@ void RefreshDisplay() {
     }
     display.print(Ss[i]);
   }
+  display.setTextSize(1);      // Normal 1:1 pixel scale
+  display.setCursor(0, 56);     // Start at top-left corner
+  display.setTextColor(SSD1306_WHITE); // Draw white text
+  display.print(F("UN7FGO SI5351 SHIELD"));  
   display.display();
-  
 }
