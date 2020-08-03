@@ -62,9 +62,9 @@ void setup() {
 void loop() {
   if ( freq != oldfreq ) {
     if (vfo == 1) {
-        si5351.set_freq(freq, SI5351_CLK0);
+        si5351.set_freq(freq*100, SI5351_CLK0);
     } else {
-        si5351.set_freq(freq, SI5351_CLK1);
+        si5351.set_freq(freq*100, SI5351_CLK1);
     }
     oldfreq = freq;
     RefreshDisplay();
