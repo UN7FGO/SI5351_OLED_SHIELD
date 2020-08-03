@@ -52,11 +52,11 @@ void setup() {
   i2c_found = si5351.init(SI5351_CRYSTAL_LOAD_8PF, 0, 0);
  
   freq = eeprom_read_dword(0x10); 
-  si5351.set_freq(freq, SI5351_CLK2);
+  si5351.set_freq(freq*100, SI5351_CLK2);
   freq = eeprom_read_dword(0x08); 
-  si5351.set_freq(freq, SI5351_CLK1);
+  si5351.set_freq(freq*100, SI5351_CLK1);
   freq = eeprom_read_dword(0x00); 
-  si5351.set_freq(freq, SI5351_CLK0);  
+  si5351.set_freq(freq*100, SI5351_CLK0);  
   oldfreq = 0;
   RefreshDisplay();
 }
@@ -65,13 +65,13 @@ void loop() {
 
   if ( freq != oldfreq ) {
     if (vfo==1) {
-          si5351.set_freq(freq, SI5351_CLK0);
+          si5351.set_freq(freq*100, SI5351_CLK0);
     }
     if (vfo==2) {
-          si5351.set_freq(freq, SI5351_CLK1);
+          si5351.set_freq(freq*100, SI5351_CLK1);
     }
     if (vfo==3) {
-          si5351.set_freq(freq, SI5351_CLK2);
+          si5351.set_freq(freq*100, SI5351_CLK2);
     }
     oldfreq = freq;
     RefreshDisplay();
