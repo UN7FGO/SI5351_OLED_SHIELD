@@ -10,9 +10,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "si5351.h"
-#include <RotaryEncoder.h>          // библиотека для энкодера
+#include "GyverEncoder.h"          // библиотека для энкодера
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_WIDTH  128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
@@ -20,59 +20,58 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Определяем контакты, к которым у нас подключен энкодер
-#define ENC_CLK_PIN 8
-#define ENC_DT_PIN  9
+#define ENC_CLK_PIN 9
+#define ENC_DT_PIN  8
 #define ENC_SW_PIN  7
 
-RotaryEncoder encoder(ENC_DT_PIN, ENC_CLK_PIN);   
-
+Encoder enc1(ENC_CLK_PIN, ENC_DT_PIN, ENC_NO_BUTTON); 
 
 Si5351 si5351;
 
-
-long int freq = 12345678;
-long int fr, k, dfreq, oldfreq, Enc;
-long int pressed;
+unsigned long int freq, fr, k, dfreq, oldfreq, Enc;
+unsigned long int pressed;
+unsigned long int frq[4];
 String Ss;
 int pos = 3;
 int vfo = 1;
 int ppos;
 
-
-
 void setup() {
+  Serial.begin(9600);
+  
   pinMode (ENC_CLK_PIN,INPUT_PULLUP);
   pinMode (ENC_DT_PIN,INPUT_PULLUP);
   pinMode (ENC_SW_PIN,INPUT_PULLUP);
 
+  enc1.setType(TYPE2);
+
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
     Serial.println(F("SSD1306 allocation failed"));
-    for(;;);
   }
-
   bool i2c_found;
   i2c_found = si5351.init(SI5351_CRYSTAL_LOAD_8PF, 0, 0);
-  if(!i2c_found)
-  { Serial.println("Device not found on I2C bus!");}
-  
+ 
+  freq = eeprom_read_dword(0x10); 
+  si5351.set_freq(freq, SI5351_CLK2);
+  freq = eeprom_read_dword(0x08); 
+  si5351.set_freq(freq, SI5351_CLK1);
   freq = eeprom_read_dword(0x00); 
-
+  si5351.set_freq(freq, SI5351_CLK0);  
+  oldfreq = 0;
+  RefreshDisplay();
 }
 
 void loop() {
+
   if ( freq != oldfreq ) {
-    switch (vfo) {
-      case 1:
+    if (vfo==1) {
           si5351.set_freq(freq, SI5351_CLK0);
-          break;
-      case 2:
+    }
+    if (vfo==2) {
           si5351.set_freq(freq, SI5351_CLK1);
-          break;
-      case 3:
+    }
+    if (vfo==3) {
           si5351.set_freq(freq, SI5351_CLK2);
-          break;
-      default:
-          break;
     }
     oldfreq = freq;
     RefreshDisplay();
@@ -121,13 +120,12 @@ void loop() {
   }
 
   // обрабатываем энкодер
-  encoder.tick();
-  Enc = encoder.getPosition();
+  enc1.tick();
   // проверяем, был ли произведен поворот ручки энкодера
-  if (Enc != 0){ 
+  if (enc1.isTurn()){ 
     dfreq = intpow(pos);
     // определяем направление вращения энкодера
-    if (Enc < 0) {
+    if (enc1.isRight()) {
        // повернули энкодер "по часовой стрелке" (CW)
        freq += dfreq;
        if (freq > 99999999) { freq = 99999999; }
@@ -136,8 +134,8 @@ void loop() {
        freq -= dfreq;
        if (freq < 100000) { freq = 100000; }
      }
-     encoder.setPosition(0);
    }
+
 
 }
 
@@ -150,10 +148,11 @@ long int intpow(int p) {
 }
 
 void RefreshDisplay() {
+  int ost;
   display.clearDisplay();
   display.cp437(true);         // Use full 256 char 'Code Page 437' font
-  display.setTextSize(2);      // Normal 1:1 pixel scale
-  display.setCursor(0, 0);     // Start at top-left corner
+  display.setTextSize(2);     
+  display.setCursor(0, 0);
   if (vfo == 1){ 
     display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
   } else {
@@ -177,16 +176,17 @@ void RefreshDisplay() {
   }
   display.print(F("V3"));
   
-  display.setTextSize(2);      // Normal 1:1 pixel scale
-  display.setCursor(0, 32);     // Start at top-left corner
+  display.setTextSize(2);      
+  display.setCursor(0, 32);     
   Ss = "";
   fr = freq;
   for (int i=8; i>0; i--) {
     k = intpow(i);
-    Ss = Ss + String(fr / k);
+    ost = fr / k;
+    Ss += ost;
     fr = fr % k; 
     if (i == 7 || i == 4) {
-      Ss = Ss + ".";    
+      Ss += ".";    
     }
   }
   display.setCursor(0, 24);     // Start at top-left corner
