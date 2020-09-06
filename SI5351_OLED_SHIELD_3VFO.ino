@@ -53,10 +53,13 @@ void setup() {
  
   freq = eeprom_read_dword(0x10); 
   si5351.set_freq(freq*100, SI5351_CLK2);
+  si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);  
   freq = eeprom_read_dword(0x08); 
   si5351.set_freq(freq*100, SI5351_CLK1);
+  si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);  
   freq = eeprom_read_dword(0x00); 
   si5351.set_freq(freq*100, SI5351_CLK0);  
+  si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);  
   oldfreq = 0;
   RefreshDisplay();
 }
