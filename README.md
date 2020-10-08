@@ -1,5 +1,5 @@
 # SI5351_OLED_SHIELD
-A simple shield for a two-channel generator with an OLED display.
+A simple shield for a 3-channel generator with an OLED display.
 
 Encoder change the current bit.
 A short press of the encoder button moves the current bit.
