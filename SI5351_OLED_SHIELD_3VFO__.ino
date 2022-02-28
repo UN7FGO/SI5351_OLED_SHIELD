@@ -20,8 +20,8 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Определяем контакты, к которым у нас подключен энкодер
-#define ENC_CLK_PIN 5
-#define ENC_DT_PIN  6
+#define ENC_CLK_PIN 6
+#define ENC_DT_PIN  5
 #define ENC_SW_PIN  7
 
 Encoder enc1(ENC_CLK_PIN, ENC_DT_PIN, ENC_NO_BUTTON); 
